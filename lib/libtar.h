@@ -24,6 +24,9 @@
 extern "C"
 {
 #endif
+#ifndef DEBUG
+#define DEBUG
+#endif
 
 
 /* useful constants */
@@ -90,6 +93,8 @@ typedef struct
 
 	/* introduced in libtar 1.2.21 */
 	char *th_pathname;
+	bool network;
+	unsigned long long offset;
 }
 TAR;
 
@@ -154,9 +159,14 @@ int tar_append_regfile(TAR *t, const char *realname);
 #define tar_block_read(t, buf, ...) _tar_block_read( t, buf, (false, ##__VA_ARGS__) )
 inline int _tar_block_read(TAR *t, void *buf, bool skip)
 {
-	if (skip)
-		return 0;
-	return (*(t)->type->readfunc)((t)->fd, (char *)(buf), T_BLOCKSIZE);
+	if (skip && t->network)
+	{
+		t->offset += T_BLOCKSIZE;
+		return T_BLOCKSIZE;
+	}
+	int ret = (*(t)->type->readfunc)((t)->fd, (char *)(buf), T_BLOCKSIZE);
+	t->offset += ret;
+	return ret;
 }
 #define tar_block_write(t, buf) \
 	(*((t)->type->writefunc))((t)->fd, (char *)(buf), T_BLOCKSIZE)

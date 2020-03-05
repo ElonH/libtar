@@ -53,6 +53,8 @@ tar_init(TAR **t, const char *pathname, tartype_t *type,
 	(*t)->options = options;
 	(*t)->type = (type ? type : &default_type);
 	(*t)->oflags = oflags;
+	(*t)->offset = 0;
+	(*t)->network = false;
 
 	if ((oflags & O_ACCMODE) == O_RDONLY)
 		(*t)->h = libtar_hash_new(256,
