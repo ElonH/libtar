@@ -16,6 +16,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <tar.h>
+#include <stdbool.h>
 
 #include <libtar_listhash.h>
 
@@ -148,8 +149,15 @@ int tar_append_regfile(TAR *t, const char *realname);
 /***** block.c *************************************************************/
 
 /* macros for reading/writing tarchive blocks */
-#define tar_block_read(t, buf) \
-	(*((t)->type->readfunc))((t)->fd, (char *)(buf), T_BLOCKSIZE)
+// #define tar_block_read(t, buf) \
+// 	(*((t)->type->readfunc))((t)->fd, (char *)(buf), T_BLOCKSIZE)
+#define tar_block_read(t, buf, ...) _tar_block_read( t, buf, (false, ##__VA_ARGS__) )
+inline int _tar_block_read(TAR *t, void *buf, bool skip)
+{
+	if (skip)
+		return 0;
+	return (*(t)->type->readfunc)((t)->fd, (char *)(buf), T_BLOCKSIZE);
+}
 #define tar_block_write(t, buf) \
 	(*((t)->type->writefunc))((t)->fd, (char *)(buf), T_BLOCKSIZE)
 
