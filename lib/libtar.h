@@ -157,17 +157,7 @@ int tar_append_regfile(TAR *t, const char *realname);
 // #define tar_block_read(t, buf) \
 // 	(*((t)->type->readfunc))((t)->fd, (char *)(buf), T_BLOCKSIZE)
 #define tar_block_read(t, buf, ...) _tar_block_read( t, buf, (false, ##__VA_ARGS__) )
-inline int _tar_block_read(TAR *t, void *buf, bool skip)
-{
-	if (skip && t->network)
-	{
-		t->offset += T_BLOCKSIZE;
-		return T_BLOCKSIZE;
-	}
-	int ret = (*(t)->type->readfunc)((t)->fd, (char *)(buf), T_BLOCKSIZE);
-	t->offset += ret;
-	return ret;
-}
+int _tar_block_read(TAR *t, void *buf, bool skip);
 #define tar_block_write(t, buf) \
 	(*((t)->type->writefunc))((t)->fd, (char *)(buf), T_BLOCKSIZE)
 

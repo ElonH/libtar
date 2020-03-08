@@ -402,4 +402,14 @@ th_write(TAR *t)
 	return 0;
 }
 
-
+int _tar_block_read(TAR *t, void *buf, bool skip)
+{
+	if (skip && t->network)
+	{
+		t->offset += T_BLOCKSIZE;
+		return T_BLOCKSIZE;
+	}
+	int ret = (*(t)->type->readfunc)((t)->fd, (char *)(buf), T_BLOCKSIZE);
+	t->offset += ret;
+	return ret;
+}
